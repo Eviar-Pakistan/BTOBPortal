@@ -40,5 +40,5 @@ yarn-error.log*
 next-env.d.ts
 
 # prisma
-/prisma/migrations
+# /prisma/migrations (commented out - migrations should be committed)
 
