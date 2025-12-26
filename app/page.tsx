@@ -23,7 +23,7 @@ export default async function HomePage() {
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight mb-4 text-balance">
                 Shopping and{" "}
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-lime-700 to-amber-500">
-                  Department Store
+                 Cataloging Tool
                 </span>
                 .
               </h1>

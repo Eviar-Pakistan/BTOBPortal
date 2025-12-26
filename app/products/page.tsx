@@ -3,6 +3,9 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import Image from "next/image";
 
+// Render this page dynamically so Prisma runs at request time, not during build
+export const dynamic = "force-dynamic";
+
 export default async function ProductsPage() {
   const products = await prisma.product.findMany({
     orderBy: { createdAt: "desc" },
