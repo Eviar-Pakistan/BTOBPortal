@@ -3,6 +3,13 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { Role } from "@prisma/client";
 
+console.log("signup route");
+console.log("prisma", prisma);
+console.log("bcrypt", bcrypt);
+console.log("Role", Role);
+console.log("NextRequest", NextRequest);
+console.log("NextResponse", NextResponse);
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

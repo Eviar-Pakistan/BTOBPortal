@@ -4,8 +4,6 @@ import { notFound } from "next/navigation";
 import { AddToCartButton } from "@/components/AddToCartButton";
 import Link from "next/link";
 
-const categories = ["drinkware", "electronics", "keychain", "accessories"];
-
 export default async function ProductDetailPage({
   params,
 }: {
@@ -14,7 +12,15 @@ export default async function ProductDetailPage({
   const { id } = await params;
   const idLower = id.toLowerCase();
 
-  // Check if it's a category first
+  // Fetch categories from database
+  const categoriesData = await (prisma as any).category.findMany({
+    select: {
+      name: true,
+    },
+  });
+  const categories = categoriesData.map((category: { name: string }) => category.name.toLowerCase());
+
+  // Check if it's a category first (case-insensitive comparison)
   if (categories.includes(idLower)) {
     // Render category page
     const products = await prisma.product.findMany({
@@ -156,6 +162,9 @@ export default async function ProductDetailPage({
             <div className="mb-4 flex flex-wrap gap-3 text-sm">
               <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-slate-700">
                 Category: <span className="ml-1 font-semibold">{product.category}</span>
+              </span>
+              <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-slate-700">
+                Location: <span className="ml-1 font-semibold">{(product as any).location || "N/A"}</span>
               </span>
               <span
                 className={`inline-flex items-center rounded-full px-3 py-1 font-semibold ${

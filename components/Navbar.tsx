@@ -6,23 +6,56 @@ import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { useCartStore } from "@/store/cartStore";
 import { Role } from "@prisma/client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import logo from "../assets/logo.png";
 
-const navigation = [
-  { name: "Home", href: "/" },
-  { name: "Products", href: "/products" },
-  { name: "Drinkware", href: "/products/drinkware" },
-  { name: "Electronics", href: "/products/electronics" },
-  { name: "Keychain", href: "/products/keychain" },
-  { name: "Accessories", href: "/products/Accessories" },
-];
+
+let cachedCategories: { name: string }[] | null = null;
+
 
 export function Navbar() {
   const { data: session } = useSession();
   const pathname = usePathname();
   const itemCount = useCartStore((state) => state.getItemCount());
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [CategoriesData, setCategories] = useState<{ name: string }[]>(
+    cachedCategories || []
+  );
+  useEffect(() => {
+
+     if (cachedCategories) {
+      setCategories(cachedCategories);
+      return;
+    }
+    async function fetchCategories() {
+      try {
+        const response = await fetch("/api/categories");
+        if (!response.ok) {
+          throw new Error("Failed to fetch categories");
+        }
+        const data = await response.json();
+        setCategories(data);
+        cachedCategories = data;
+  
+
+       
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    }
+    fetchCategories();
+  }, []);
+
+
+  let navigation: { name: string; href: string }[] = [];
+
+  CategoriesData.forEach((category: { name: string }) => {
+    navigation.push({
+      name: category.name,
+      href: `/products/${category.name.toLowerCase()}`,
+    });
+  });
 
   return (
     <nav className="bg-gradient-to-r from-[#CCBE1A] to-[#788F35] text-white shadow-md">
@@ -39,7 +72,29 @@ export function Navbar() {
                 priority
               />
             </Link>
-            <div className="hidden md:flex md:ml-8 md:space-x-4">
+
+            <Link href="/" className={`px-3 py-2 text-sm font-medium rounded-full transition-colors ${pathname === "/"
+                      ? "bg-white/95 text-[#4b5b1f]"
+                      : "hover:bg-white/15"
+                    }`}>
+              Home
+            </Link>
+
+            <Link href="/products" className={`px-3 py-2 text-sm font-medium rounded-full transition-colors ${pathname === "/products"
+                      ? "bg-white/95 text-[#4b5b1f]"
+                      : "hover:bg-white/15"
+                    }`}>
+              Products
+            </Link>
+
+            <Link href="/leftovers" className={`px-3 py-2 text-sm font-medium rounded-full transition-colors ${pathname === "/leftovers"
+                      ? "bg-white/95 text-[#4b5b1f]"
+                      : "hover:bg-white/15"
+                    }`}>
+              Leftovers
+            </Link>
+
+            {/* <div className="hidden md:flex md:ml-8 md:space-x-4 border-2 border-red-500">
               {navigation.map((item) => (
                 <Link
                   key={item.name}
@@ -52,7 +107,30 @@ export function Navbar() {
                   {item.name}
                 </Link>
               ))}
+            </div> */}
+
+            <div className="relative">
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="px-3 py-2 text-sm font-medium rounded-full transition-colors hover:bg-white/15"
+              >
+                Categories
+              </button>
+              {dropdownOpen && (
+                <div className="absolute top-10 left-0 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                  {navigation.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
+
           </div>
 
           {/* Desktop menu */}
@@ -206,6 +284,36 @@ export function Navbar() {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-accent-light">
             <div className="px-2 pt-2 pb-3 space-y-1">
+              <Link
+                href="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-3 py-2 text-base font-medium ${pathname === "/"
+                    ? "bg-white text-accent"
+                    : "hover:bg-accent-light"
+                  }`}
+              >
+                Home
+              </Link>
+              <Link
+                href="/products"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-3 py-2 text-base font-medium ${pathname === "/products"
+                    ? "bg-white text-accent"
+                    : "hover:bg-accent-light"
+                  }`}
+              >
+                Products
+              </Link>
+              <Link
+                href="/leftovers"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-3 py-2 text-base font-medium ${pathname === "/leftovers"
+                    ? "bg-white text-accent"
+                    : "hover:bg-accent-light"
+                  }`}
+              >
+                Leftovers
+              </Link>
               {navigation.map((item) => (
                 <Link
                   key={item.name}

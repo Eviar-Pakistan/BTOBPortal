@@ -12,7 +12,11 @@ const productSchema = z.object({
   description: z.string().min(1, "Description is required"),
   price: z.number().min(0, "Price must be positive"),
   stock: z.number().min(0, "Stock must be non-negative"),
-  category: z.enum(["Drinkware", "Electronics", "Keychain",'Accessories']),
+  category: z.string().min(1, "Category is required"),
+  location: z.string().min(1, "Location is required"),
+  type: z.enum(["local", "import"], {
+    required_error: "Type is required",
+  }),
   images: z.array(z.string()).min(1, "At least one image is required"),
   colorVariants: z.array(z.string()).default([]),
 });
@@ -22,6 +26,8 @@ type ProductFormData = z.infer<typeof productSchema>;
 interface ProductFormProps {
   product?: Product;
 }
+
+let cachedCategories: { name: string }[] | null = null;
 
 export function ProductForm({ product }: ProductFormProps) {
   const router = useRouter();
@@ -33,6 +39,11 @@ export function ProductForm({ product }: ProductFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
+
+  const [CategoriesData, setCategories] = useState<{ name: string }[]>(
+    cachedCategories || []
+  );
+  
 
   const {
     register,
@@ -48,6 +59,8 @@ export function ProductForm({ product }: ProductFormProps) {
           price: product.price,
           stock: product.stock,
           category: product.category as any,
+          location: (product as any).location || "",
+          type: (product as any).type || "local",
           images: product.images,
           colorVariants: product.colorVariants,
         }
@@ -61,6 +74,31 @@ export function ProductForm({ product }: ProductFormProps) {
   useEffect(() => {
     setValue("colorVariants", colorVariants);
   }, [colorVariants, setValue]);
+
+
+  useEffect(() => {
+
+    if (cachedCategories) {
+     setCategories(cachedCategories);
+     return;
+   }
+   async function fetchCategories() {
+     try {
+       const response = await fetch("/api/categories");
+       if (!response.ok) {
+         throw new Error("Failed to fetch categories");
+       }
+       const data = await response.json();
+       setCategories(data);
+       cachedCategories = data;
+      
+     } catch (error) {
+       console.error("Error fetching categories:", error);
+     }
+   }
+   fetchCategories();
+ }, []);
+
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -205,20 +243,46 @@ export function ProductForm({ product }: ProductFormProps) {
         </div>
       </div>
 
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+          <select
+            {...register("category")}
+            className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent rounded-full"
+          >
+            {CategoriesData.map((category) => (
+              <option key={category.name} value={category.name}>{category.name}</option>
+            ))}
+          </select>
+          {errors.category && (
+            <p className="text-red-500 text-sm mt-1">{errors.category.message}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Type *</label>
+          <select
+            {...register("type")}
+            className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent rounded-full"
+          >
+            <option value="local">Local</option>
+            <option value="import">Import</option>
+          </select>
+          {errors.type && (
+            <p className="text-red-500 text-sm mt-1">{errors.type.message}</p>
+          )}
+        </div>
+      </div>
+
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>
-        <select
-          {...register("category")}
+        <label className="block text-sm font-medium text-gray-700 mb-2">Location *</label>
+        <input
+          {...register("location")}
           className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent rounded-full"
-        >
-          <option value="Drinkware">Drinkware</option>
-          <option value="Electronics">Electronics</option>
-          <option value="Keychain">Keychain</option>
-          <option value="Accessories">Accessories</option>
-         
-        </select>
-        {errors.category && (
-          <p className="text-red-500 text-sm mt-1">{errors.category.message}</p>
+          placeholder="Enter product location"
+        />
+        {errors.location && (
+          <p className="text-red-500 text-sm mt-1">{errors.location.message}</p>
         )}
       </div>
 

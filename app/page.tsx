@@ -8,6 +8,13 @@ export default async function HomePage() {
     orderBy: { createdAt: "desc" },
   });
 
+  // console.log("featuredProducts:", featuredProducts.map((product) => product.category));
+
+  const CategoriesData = await prisma.category.findMany({
+    take: 3,
+  });
+  // console.log("CategoriesData:", CategoriesData.map((category) => category));
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -168,27 +175,17 @@ export default async function HomePage() {
               <span className="text-sm font-semibold text-slate-900 mb-1">All Products</span>
               <span className="text-xs text-slate-500">View complete catalog</span>
             </Link>
-            <Link
-              href="/products/drinkware"
-              className="rounded-3xl bg-white/90 border border-slate-100 px-5 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between"
-            >
-              <span className="text-sm font-semibold text-slate-900 mb-1">Drinkware</span>
-              <span className="text-xs text-slate-500">Mugs, bottles & more</span>
-            </Link>
-            <Link
-              href="/products/electronics"
-              className="rounded-3xl bg-white/90 border border-slate-100 px-5 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between"
-            >
-              <span className="text-sm font-semibold text-slate-900 mb-1">Electronics</span>
-              <span className="text-xs text-slate-500">Tech for every desk</span>
-            </Link>
-            <Link
-              href="/products/accessories"
-              className="rounded-3xl bg-white/90 border border-slate-100 px-5 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between"
-            >
-              <span className="text-sm font-semibold text-slate-900 mb-1">Accessories</span>
-              <span className="text-xs text-slate-500">Gifts & merch</span>
-            </Link>
+            {CategoriesData.map((category) => (
+              <Link
+                key={category.id}
+                href={`/products/${category.name}`}
+                className="rounded-3xl bg-white/90 border border-slate-100 px-5 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between"
+              >
+                <span className="text-sm font-semibold text-slate-900 mb-1">{category.name}</span>
+                <span className="text-xs text-slate-500">{category.description}</span>
+              </Link>
+            ))}
+            
           </div>
         </section>
       </main>

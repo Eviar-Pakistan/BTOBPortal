@@ -76,18 +76,21 @@ model VerificationToken {
 }
 
 model Product {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String
-  description   String   @db.Text
+  description   String    @db.Text
   price         Float
-  stock         Int      @default(0)
+  stock         Int       @default(0)
   category      String
-  images        String[] // Array of image URLs
-  colorVariants String[] // Array of color options
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  location      String
+  type          String
+  images        String[]  // Array of image URLs
+  colorVariants String[]  // Array of color options
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   cartItems     CartItem[]
   orderItems    OrderItem[]
+  leftOvers     LeftOver[]
 }
 
 model Cart {
@@ -150,3 +153,21 @@ model OrderItem {
   @@index([orderId])
 }
 
+model category{
+  id               String         @id @default(cuid())
+  name             String
+  description      String
+}
+
+
+model LeftOver {
+  id                String   @id @default(cuid())
+  productId         String
+  custodianName     String
+  custodianLocation String
+  quantity          Int
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
