@@ -171,3 +171,27 @@ model LeftOver {
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
+
+
+model AuditLog {
+  id            String    @id @default(cuid())
+  userId        String    // Admin user ID who performed the action
+  userName      String?   // Admin user name (for easier querying)
+  userEmail     String?   // Admin user email
+  action        String    // CREATE, UPDATE, DELETE
+  entityType    String    // PRODUCT, CATEGORY, LEFTOVER
+  entityId      String    // ID of the entity that was modified
+  entityName    String?   // Name of the entity (for easier querying)
+  oldData       Json?     // Previous data (for UPDATE/DELETE)
+  newData       Json?     // New data (for CREATE/UPDATE)
+  changes       Json?     // Specific fields that changed (for UPDATE)
+  ipAddress     String?   // IP address of the request
+  userAgent     String?   // User agent of the request
+  createdAt     DateTime  @default(now())
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@index([action])
+  @@map("AuditLog")  // Add this line to explicitly map to the table name
+}

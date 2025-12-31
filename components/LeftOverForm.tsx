@@ -112,9 +112,9 @@ export function LeftOverForm({ leftover }: LeftOverFormProps) {
 
     try {
       // Validate quantity
-      if (data.quantity > maxQuantity) {
-        throw new Error(`Quantity cannot exceed available stock (${maxQuantity})`);
-      }
+      // if (data.quantity > maxQuantity) {
+      //   throw new Error(`Quantity cannot exceed available stock (${maxQuantity})`);
+      // }
 
       const url = leftover ? `/api/leftovers/${leftover.id}` : "/api/leftovers";
       const method = leftover ? "PUT" : "POST";
@@ -202,13 +202,15 @@ export function LeftOverForm({ leftover }: LeftOverFormProps) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        {/* <label className="block text-sm font-medium text-gray-700 mb-2">
           Quantity * (Max: {maxQuantity})
+        </label> */}
+         <label className="block text-sm font-medium text-gray-700 mb-2">
+          Quantity
         </label>
         <input
           type="number"
           min="1"
-          max={maxQuantity}
           {...register("quantity", { valueAsNumber: true })}
           className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-slate-900 rounded-full"
           placeholder="Enter quantity"
@@ -216,11 +218,11 @@ export function LeftOverForm({ leftover }: LeftOverFormProps) {
         {errors.quantity && (
           <p className="text-red-500 text-sm mt-1">{errors.quantity.message}</p>
         )}
-        {maxQuantity > 0 && (
+        {/* {maxQuantity > 0 && (
           <p className="text-sm text-slate-500 mt-1">
             Maximum available: {maxQuantity} units
           </p>
-        )}
+        )} */}
       </div>
 
       <div className="flex gap-4">

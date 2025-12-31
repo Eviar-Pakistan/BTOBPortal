@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Role } from "@prisma/client";
+import { createAuditLog, getClientInfo } from "@/lib/auditLog";
 
 export async function GET() {
   try {
@@ -54,7 +55,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get product to check stock
+    // Get product to verify it exists
     const product = await (prisma as any).product.findUnique({
       where: { id: productId },
     });
@@ -66,34 +67,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (quantityNum > product.stock) {
-      return NextResponse.json(
-        { error: `Quantity cannot exceed available stock (${product.stock})` },
-        { status: 400 }
-      );
-    }
+    // Create leftover without affecting product stock
+    const result = await (prisma as any).leftOver.create({
+      data: {
+        productId,
+        custodianName,
+        custodianLocation,
+        quantity: quantityNum,
+      },
+    });
 
-    // Create leftover and update product stock in a transaction
-    const result = await prisma.$transaction(async (tx) => {
-      const leftover = await (tx as any).leftOver.create({
-        data: {
-          productId,
-          custodianName,
-          custodianLocation,
-          quantity: quantityNum,
-        },
-      });
-
-      await tx.product.update({
-        where: { id: productId },
-        data: {
-          stock: {
-            decrement: quantityNum,
-          },
-        },
-      });
-
-      return leftover;
+    const { ipAddress, userAgent } = getClientInfo(req);
+    await createAuditLog({
+      userId: session.user.id!,
+      userName: session.user.name || undefined,
+      userEmail: session.user.email || undefined,
+      action: "CREATE",
+      entityType: "LEFTOVER",
+      entityId: result.id,
+      entityName: `${product.name} - ${custodianName}`,
+      newData: result,
+      ipAddress,
+      userAgent,
     });
 
     return NextResponse.json(result);

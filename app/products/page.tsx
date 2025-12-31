@@ -35,11 +35,11 @@ export default async function ProductsPage() {
               className="group relative rounded-3xl bg-white border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden"
             >
               {product.images[0] && (
-                <div className="aspect-[4/3] bg-slate-50 relative overflow-hidden">
+                <div className="aspect-[4/3] bg-transparent relative overflow-hidden">
                   <img
                     src={product.images[0]}
                     alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
               )}

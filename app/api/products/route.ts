@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Role } from "@prisma/client";
+import { createAuditLog, getClientInfo } from "@/lib/auditLog";
 
 export async function GET() {
   try {
@@ -47,6 +48,21 @@ export async function POST(req: NextRequest) {
         colorVariants: colorVariants || [],
       },
     });
+
+      // Create audit log
+      const { ipAddress, userAgent } = getClientInfo(req);
+      await createAuditLog({
+        userId: session.user.id!,
+        userName: session.user.name || undefined,
+        userEmail: session.user.email || undefined,
+        action: "CREATE",
+        entityType: "PRODUCT",
+        entityId: product.id,
+        entityName: product.name,
+        newData: product,
+        ipAddress,
+        userAgent,
+      });
 
     return NextResponse.json(product);
   } catch (error: any) {

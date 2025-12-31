@@ -7,7 +7,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 const categorySchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Name is required").refine(
+    (val) => val.charAt(0) === val.charAt(0).toUpperCase(),
+    "Name must start with an uppercase letter"
+  ),
+  
   description: z.string().min(1, "Description is required"),
 });
 
@@ -79,7 +83,7 @@ export function CategoryForm({ category }: CategoryFormProps) {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Category Name *
+          Category Name It should be one word and start with an uppercase letter *
         </label>
         <input
           {...register("name")}

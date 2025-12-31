@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Role } from "@prisma/client";
+import { createAuditLog, getChanges, getClientInfo } from "@/lib/auditLog";
 
 export async function GET(
   req: NextRequest,
@@ -63,19 +64,30 @@ export async function PUT(
         { status: 400 }
       );
     }
-
-    // Get existing leftover and product
-    const existingLeftover = await (prisma as any).leftOver.findUnique({
+    // Get old leftover data before update (for audit log)
+    const oldLeftover = await (prisma as any).leftOver.findUnique({
       where: { id },
       include: { product: true },
     });
 
-    if (!existingLeftover) {
+    if (!oldLeftover) {
       return NextResponse.json(
         { error: "Leftover not found" },
         { status: 404 }
       );
     }
+    // Get existing leftover and product
+    // const existingLeftover = await (prisma as any).leftOver.findUnique({
+    //   where: { id },
+    //   include: { product: true },
+    // });
+
+    // if (!existingLeftover) {
+    //   return NextResponse.json(
+    //     { error: "Leftover not found" },
+    //     { status: 404 }
+    //   );
+    // }
 
     // Get current product (might be different if productId changed)
     const product = await (prisma as any).product.findUnique({
@@ -90,61 +102,97 @@ export async function PUT(
     }
 
     // Calculate stock adjustment
-    const quantityDifference = quantityNum - existingLeftover.quantity;
-    const availableStock = product.stock + (existingLeftover.productId === productId ? existingLeftover.quantity : 0);
+    // const quantityDifference = quantityNum - existingLeftover.quantity;
+    // const availableStock = product.stock + (existingLeftover.productId === productId ? existingLeftover.quantity : 0);
 
-    if (quantityNum > availableStock) {
+    // if (quantityNum > availableStock) {
+    //   return NextResponse.json(
+    //     { error: `Quantity cannot exceed available stock (${availableStock})` },
+    //     { status: 400 }
+    //   );
+    // }
+
+    // Update leftover and adjust product stock in a transaction
+    // const result = await prisma.$transaction(async (tx) => {
+    //   // If product changed, restore stock to old product and deduct from new product
+    //   if (existingLeftover.productId !== productId) {
+    //     await tx.product.update({
+    //       where: { id: existingLeftover.productId },
+    //       data: {
+    //         stock: {
+    //           increment: existingLeftover.quantity,
+    //         },
+    //       },
+    //     });
+
+    //     await tx.product.update({
+    //       where: { id: productId },
+    //       data: {
+    //         stock: {
+    //           decrement: quantityNum,
+    //         },
+    //       },
+    //     });
+    //   } else {
+    //     // Same product, adjust by difference
+    //     await tx.product.update({
+    //       where: { id: productId },
+    //       data: {
+    //         stock: {
+    //           decrement: quantityDifference,
+    //         },
+    //       },
+    //     });
+    //   }
+
+    //   const leftover = await (tx as any).leftOver.update({
+    //     where: { id },
+    //     data: {
+    //       productId,
+    //       custodianName,
+    //       custodianLocation,
+    //       quantity: quantityNum,
+    //     },
+    //   });
+
+    //   return leftover;
+    // });
+
+    const result = await (prisma as any).leftOver.update({
+      where: { id },
+      data: {
+        productId,
+        custodianName,
+        custodianLocation,
+        quantity: quantityNum,
+      },
+    });
+
+    if (!result) {
       return NextResponse.json(
-        { error: `Quantity cannot exceed available stock (${availableStock})` },
-        { status: 400 }
+        { error: "Failed to update leftover" },
+        { status: 500 }
       );
     }
 
-    // Update leftover and adjust product stock in a transaction
-    const result = await prisma.$transaction(async (tx) => {
-      // If product changed, restore stock to old product and deduct from new product
-      if (existingLeftover.productId !== productId) {
-        await tx.product.update({
-          where: { id: existingLeftover.productId },
-          data: {
-            stock: {
-              increment: existingLeftover.quantity,
-            },
-          },
-        });
 
-        await tx.product.update({
-          where: { id: productId },
-          data: {
-            stock: {
-              decrement: quantityNum,
-            },
-          },
-        });
-      } else {
-        // Same product, adjust by difference
-        await tx.product.update({
-          where: { id: productId },
-          data: {
-            stock: {
-              decrement: quantityDifference,
-            },
-          },
-        });
-      }
-
-      const leftover = await (tx as any).leftOver.update({
-        where: { id },
-        data: {
-          productId,
-          custodianName,
-          custodianLocation,
-          quantity: quantityNum,
-        },
-      });
-
-      return leftover;
+    // Create audit log
+    const { ipAddress, userAgent } = getClientInfo(req);
+    await createAuditLog({
+      userId: session.user.id!,
+      userName: session.user.name || undefined,
+      userEmail: session.user.email || undefined,
+      action: "UPDATE",
+      entityType: "LEFTOVER",
+      entityId: result.id,
+      entityName: `${product.name} - ${custodianName}`,
+      oldData: oldLeftover,
+      newData: result,
+      changes: getChanges(oldLeftover, result),
+      ipAddress,
+      userAgent,
     });
+
 
     return NextResponse.json(result);
   } catch (error: any) {
@@ -168,7 +216,7 @@ export async function DELETE(
 
     const { id } = await params;
 
-    // Get leftover to restore stock
+    // Get leftover to verify it exists
     const leftover = await (prisma as any).leftOver.findUnique({
       where: { id },
       include: { product: true },
@@ -181,20 +229,26 @@ export async function DELETE(
       );
     }
 
-    // Delete leftover and restore stock in a transaction
-    await prisma.$transaction(async (tx) => {
-      await (tx as any).leftOver.delete({
-        where: { id },
-      });
+    // Delete leftover without affecting product stock
+    await (prisma as any).leftOver.delete({
+      where: { id },
+    });
 
-      await tx.product.update({
-        where: { id: leftover.productId },
-        data: {
-          stock: {
-            increment: leftover.quantity,
-          },
-        },
-      });
+    // Create audit log
+    const { ipAddress, userAgent } = getClientInfo(req);
+    await createAuditLog({
+      userId: session.user.id!,
+      userName: session.user.name || undefined,
+      userEmail: session.user.email || undefined,
+      action: "DELETE",
+      entityType: "LEFTOVER",
+      entityId: id,
+      entityName: leftover.product 
+        ? `${leftover.product.name} - ${leftover.custodianName}`
+        : `Product ID: ${leftover.productId} - ${leftover.custodianName}`,
+      oldData: leftover,
+      ipAddress,
+      userAgent,
     });
 
     return NextResponse.json({ success: true });
