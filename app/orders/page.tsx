@@ -19,6 +19,9 @@ const statusColors: Record<DeliveryStatus, string> = {
   COMPLETED: "bg-green-200 text-green-800",
 };
 
+// Render this page dynamically so Prisma runs at request time, not during build
+export const dynamic = "force-dynamic";
+
 export default async function OrdersPage() {
   const session = await auth();
   if (!session?.user) {

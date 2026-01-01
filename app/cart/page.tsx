@@ -5,9 +5,35 @@ import { useCartStore } from "@/store/cartStore";
 import Link from "next/link";
 import { GenerateQuotationButton } from "@/components/GenerateQuotationButton";
 import { PlaceOrderButton } from "@/components/PlaceOrderButton";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { Role } from "@prisma/client";
 
 export default function CartPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const { items, updateQuantity, removeItem, getTotal } = useCartStore();
+
+  useEffect(() => {
+    if (status === "loading") return; // Wait for session to load
+    
+    if (!session?.user || session.user.role !== Role.USER) {
+      router.push("/");
+    }
+  }, [session, status, router]);
+
+  // Show nothing while checking or redirecting
+  if (status === "loading" || !session?.user || session.user.role !== Role.USER) {
+    return (
+      <div className="min-h-screen flex flex-col bg-white">
+        <Navbar />
+        <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <div className="text-center">Loading...</div>
+        </main>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (

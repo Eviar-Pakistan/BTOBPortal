@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { CartItem, useCartStore } from "@/store/cartStore";
 
 interface PlaceOrderButtonProps {
@@ -12,7 +11,6 @@ interface PlaceOrderButtonProps {
 
 export function PlaceOrderButton({ items, total }: PlaceOrderButtonProps) {
   const { data: session } = useSession();
-  const router = useRouter();
   const clearCart = useCartStore((state) => state.clearCart);
   const [showModal, setShowModal] = useState(false);
   const [poNumber, setPoNumber] = useState("");
@@ -51,7 +49,8 @@ export function PlaceOrderButton({ items, total }: PlaceOrderButtonProps) {
       }
 
       clearCart();
-      router.push("/orders");
+      // Force full page reload to ensure fresh data is fetched
+      window.location.href = "/orders";
     } catch (err: any) {
       setError(err.message || "Failed to place order");
     } finally {
