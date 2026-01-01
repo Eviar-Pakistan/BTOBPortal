@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { CartItem } from "@/store/cartStore";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import logo from "../assets/rebrand.png";
 
 interface GenerateQuotationButtonProps {
   items: CartItem[];
@@ -26,27 +27,54 @@ export function GenerateQuotationButton({ items }: GenerateQuotationButtonProps)
       // Generate PDF
       const doc = new jsPDF();
 
+
       // Letterhead - themed to match app (brand yellow / green)
       doc.setFillColor(204, 190, 26); // #CCBE1A
-      doc.rect(0, 0, 210, 35, "F");
-      doc.setFillColor(120, 143, 53); // #788F35
-      doc.rect(0, 30, 210, 5, "F");
+      doc.rect(0, 0, 210, 15, "F");
+      
+      // Image Logo (left side)
+      const logoUrl = logo.src;
+      doc.addImage(logoUrl, "PNG", 15, 17, 40, 25);
 
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(22);
-      doc.text("B2B Portal", 105, 18, { align: "center" });
+      // Company information (right side of header)
+      doc.setTextColor(0, 0, 0); // Black text
       doc.setFontSize(11);
-      doc.text("Business to Business E-commerce", 105, 25, { align: "center" });
+      doc.setFont("helvetica", "bold");
+      doc.text("Rebrand Private Ltd.", 156, 25, { align: "left" });
+      
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "normal");
+      doc.text("74/1-Main Industrial Estate,", 156, 33 , { align: "left" });
+      doc.text("Kotlakhpat, Lahore, Pakistan", 156, 38, { align: "left" });
+      doc.text("92 42 5140790", 156, 43, { align: "left" });
+      doc.text("www.rebrandpk.biz", 156, 48, { align: "left" });
+      
+      //Bottom Header
+      doc.setFillColor(204, 190, 26); // #CCBE1A
+      doc.rect(0, 282, 210, 15, "F");
+
+
+      
+
+
+      // doc.setFillColor(120, 143, 53); // #788F35
+      // doc.rect(0, 30, 210, 5, "F");
+
+      // doc.setTextColor(255, 255, 255);
+      // doc.setFontSize(22);
+      // doc.text("B2B Portal", 105, 18, { align: "center" });
+      // doc.setFontSize(11);
+      // doc.text("Business to Business E-commerce", 105, 25, { align: "center" });
 
       // Reset text color for body
       doc.setTextColor(0, 0, 0);
       doc.setFontSize(18);
-      doc.text("QUOTATION", 20, 55);
+      doc.text("QUOTATION", 15, 55, { align: "left" });
       
       doc.setFontSize(10);
-      doc.text(`Quotation Number: ${quotationNumber}`, 20, 65);
-      doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 70);
-      doc.text(`Customer: ${session.user.email}`, 20, 75);
+      doc.text(`Quotation Number: ${quotationNumber}`, 15 , 65, { align: "left" });
+      doc.text(`Date: ${new Date().toLocaleDateString()}`, 15, 70, { align: "left" });
+      doc.text(`Customer: ${session.user.email}`, 15, 75, { align: "left" });
 
       // Table data
       const tableData = items.map((item, index) => [
