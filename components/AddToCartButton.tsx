@@ -25,6 +25,7 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
     addItem({
       productId: product.id,
       name: product.name,
+      productNumber: (product as any).productNumber || "",
       price: product.price,
       quantity,
       colorVariant: selectedColor,

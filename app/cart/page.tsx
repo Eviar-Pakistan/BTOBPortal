@@ -80,6 +80,7 @@ export default function CartPage() {
                   )}
                   <div className="flex-1">
                     <h3 className="font-semibold text-base text-slate-900">{item.name}</h3>
+                    <p className="text-xs text-slate-600 font-medium">Product Number: {item.productNumber || ""}</p>
                     <p className="text-xs text-slate-500">Color: {item.colorVariant}</p>
                     <p className="text-lg font-bold text-emerald-700 mt-2">
                       PKR {item.price.toFixed(0)}

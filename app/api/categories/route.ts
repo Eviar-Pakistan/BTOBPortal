@@ -7,9 +7,6 @@ import { createAuditLog, getClientInfo } from "@/lib/auditLog";
 export async function GET() {
   try {
     const categories = await (prisma as any).category.findMany({
-      select: {
-        name: true,
-      },
       orderBy: {
         name: "asc",
       },

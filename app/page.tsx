@@ -93,6 +93,9 @@ export default async function HomePage() {
                         <p className="text-[0.68rem] font-medium text-slate-500 line-clamp-1">
                           {product.category || "Featured"}
                         </p>
+                        <p className="text-[0.65rem] text-slate-600 font-medium line-clamp-1">
+                          {(product as any).productNumber || ""}
+                        </p>
                         <p className="text-xs font-semibold text-slate-900 line-clamp-1">
                           {product.name}
                         </p>
@@ -144,6 +147,9 @@ export default async function HomePage() {
                 <div className="p-4">
                   <p className="text-xs font-medium text-lime-700 mb-1 uppercase tracking-wide">
                     {product.category || "Featured"}
+                  </p>
+                  <p className="text-xs text-slate-600 mb-1 font-medium">
+                    {(product as any).productNumber || ""}
                   </p>
                   <h3 className="font-semibold text-base text-slate-900 mb-1 line-clamp-1">
                     {product.name}

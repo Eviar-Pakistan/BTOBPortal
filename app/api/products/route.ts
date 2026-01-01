@@ -33,11 +33,12 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name, description, price, stock, category, location, type, images, colorVariants } = body;
+    const { name, productNumber, description, price, stock, category, location, type, images, colorVariants } = body;
 
     const product = await prisma.product.create({
       data: {
         name,
+        productNumber: productNumber as string,
         description,
         price: parseFloat(price),
         stock: parseInt(stock),
@@ -46,7 +47,7 @@ export async function POST(req: NextRequest) {
         type,
         images,
         colorVariants: colorVariants || [],
-      },
+      } as any,
     });
 
       // Create audit log

@@ -9,6 +9,7 @@ import { DeleteLeftOverButton } from "./DeleteLeftOverButton";
 interface Product {
   id: string;
   name: string;
+  productNumber: string;
   description: string;
   price: number;
   stock: number;
@@ -33,6 +34,7 @@ interface LeftOver {
   product: {
     id: string;
     name: string;
+    productNumber: string;
     stock: number;
   };
 }
@@ -109,6 +111,7 @@ export function AdminPanel({ products, categories, leftovers }: AdminPanelProps)
                   <tr>
                     <th className="px-6 py-3 text-left font-medium w-24">Image</th>
                     <th className="px-6 py-3 text-left font-medium w-64">Name</th>
+                    <th className="px-6 py-3 text-left font-medium w-32">Product Number</th>
                     <th className="px-6 py-3 text-left font-medium w-32">Category</th>
                     <th className="px-6 py-3 text-left font-medium w-32">Price</th>
                     <th className="px-6 py-3 text-left font-medium w-24">Stock</th>
@@ -141,6 +144,9 @@ export function AdminPanel({ products, categories, leftovers }: AdminPanelProps)
                         <div className="text-xs text-slate-500 line-clamp-2">
                           {product.description}
                         </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900 w-32">
+                        {product.productNumber || ""}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900 w-32">
                         {product.category}
@@ -275,6 +281,9 @@ export function AdminPanel({ products, categories, leftovers }: AdminPanelProps)
                       <td className="px-6 py-4 align-top w-64">
                         <div className="text-sm font-semibold text-slate-900">
                           {leftover.product.name}
+                        </div>
+                        <div className="text-xs text-slate-600 font-medium">
+                          Product Number: {leftover.product.productNumber || ""}
                         </div>
                         <div className="text-xs text-slate-500">
                           Stock: {leftover.product.stock}

@@ -81,6 +81,9 @@ export default async function OrdersPage() {
                           <h3 className="font-semibold text-sm text-slate-900">
                             {item.product.name}
                           </h3>
+                          <p className="text-xs text-slate-600 font-medium">
+                            Product Number: {(item.product as any).productNumber || ""}
+                          </p>
                           <p className="text-xs text-slate-600">
                             Quantity: {item.quantity} × PKR {item.price.toFixed(0)}
                           </p>

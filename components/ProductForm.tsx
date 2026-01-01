@@ -9,6 +9,7 @@ import { z } from "zod";
 
 const productSchema = z.object({
   name: z.string().min(1, "Name is required"),
+  productNumber: z.string().min(1, "Product Number is required"),
   description: z.string().min(1, "Description is required"),
   price: z.number().min(0, "Price must be positive"),
   stock: z.number().min(0, "Stock must be non-negative"),
@@ -55,6 +56,7 @@ export function ProductForm({ product }: ProductFormProps) {
     defaultValues: product
       ? {
           name: product.name,
+          productNumber: (product as any).productNumber || "",
           description: product.description,
           price: product.price,
           stock: product.stock,
@@ -199,6 +201,20 @@ export function ProductForm({ product }: ProductFormProps) {
         />
         {errors.name && (
           <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+        )}
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Product Number *
+        </label>
+        <input
+          {...register("productNumber")}
+          className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent rounded-full"
+          placeholder="Enter product number"
+        />
+        {errors.productNumber && (
+          <p className="text-red-500 text-sm mt-1">{errors.productNumber.message}</p>
         )}
       </div>
 

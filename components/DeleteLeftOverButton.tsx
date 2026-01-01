@@ -1,14 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 interface DeleteLeftOverButtonProps {
   leftoverId: string;
 }
 
 export function DeleteLeftOverButton({ leftoverId }: DeleteLeftOverButtonProps) {
-  const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {

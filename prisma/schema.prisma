@@ -78,6 +78,7 @@ model VerificationToken {
 model Product {
   id            String    @id @default(cuid())
   name          String
+  productNumber String
   description   String    @db.Text
   price         Float
   stock         Int       @default(0)

@@ -13,7 +13,13 @@ export async function GET() {
 
     const leftovers = await (prisma as any).leftOver.findMany({
       include: {
-        product: true,
+        product: {
+          select: {
+            id: true,
+            name: true,
+            stock: true,
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",

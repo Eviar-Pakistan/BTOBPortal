@@ -12,6 +12,7 @@ export default async function LeftoversPage() {
         select: {
           id: true,
           name: true,
+          productNumber: true,
           description: true,
           price: true,
           stock: true,
@@ -58,6 +59,11 @@ export default async function LeftoversPage() {
                 <p className="text-xs font-medium text-lime-700 mb-1 uppercase tracking-wide">
                   {leftover.product.category || "Product"}
                 </p>
+                {leftover.product.productNumber && (
+                  <p className="text-xs text-slate-600 mb-1 font-medium">
+                    {leftover.product.productNumber}
+                  </p>
+                )}
                 <h3 className="font-semibold text-base text-slate-900 mb-1 line-clamp-1">
                   {leftover.product.name}
                 </h3>

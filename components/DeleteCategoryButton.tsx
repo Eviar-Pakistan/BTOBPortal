@@ -1,14 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 interface DeleteCategoryButtonProps {
   categoryId: string;
 }
 
 export function DeleteCategoryButton({ categoryId }: DeleteCategoryButtonProps) {
-  const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {

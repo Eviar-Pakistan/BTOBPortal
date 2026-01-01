@@ -4,6 +4,7 @@ import { persist } from "zustand/middleware";
 export interface CartItem {
   productId: string;
   name: string;
+  productNumber: string;
   price: number;
   quantity: number;
   colorVariant: string;

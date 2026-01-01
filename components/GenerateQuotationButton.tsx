@@ -79,6 +79,7 @@ export function GenerateQuotationButton({ items }: GenerateQuotationButtonProps)
       // Table data
       const tableData = items.map((item, index) => [
         index + 1,
+        item.productNumber || "",
         item.name,
         item.colorVariant,
         item.quantity.toString(),
@@ -88,7 +89,7 @@ export function GenerateQuotationButton({ items }: GenerateQuotationButtonProps)
 
       autoTable(doc, {
         startY: 85,
-        head: [["#", "Product", "Color", "Quantity", "Unit Price", "Total"]],
+        head: [["#", "Product Number", "Product", "Color", "Quantity", "Unit Price", "Total"]],
         body: tableData,
         styles: { fontSize: 9 },
         headStyles: { fillColor: [120, 143, 53] }, // #788F35

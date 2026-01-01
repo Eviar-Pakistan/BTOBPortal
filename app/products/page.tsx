@@ -47,6 +47,9 @@ export default async function ProductsPage() {
                 <p className="text-xs font-medium text-lime-700 mb-1 uppercase tracking-wide">
                   {product.category || "Product"}
                 </p>
+                <p className="text-xs text-slate-600 mb-1 font-medium">
+                  {(product as any).productNumber || ""}
+                </p>
                 <h3 className="font-semibold text-base text-slate-900 mb-1 line-clamp-1">
                   {product.name}
                 </h3>

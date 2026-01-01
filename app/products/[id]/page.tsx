@@ -69,6 +69,9 @@ export default async function ProductDetailPage({
                   <p className="text-xs font-medium text-lime-700 mb-1 uppercase tracking-wide">
                     {product.category || categoryTitle}
                   </p>
+                  <p className="text-xs text-slate-600 mb-1 font-medium">
+                    {(product as any).productNumber || ""}
+                  </p>
                   <h3 className="font-semibold text-base text-slate-900 mb-1 line-clamp-1">
                     {product.name}
                   </h3>
@@ -147,6 +150,9 @@ export default async function ProductDetailPage({
           <div className="rounded-3xl bg-white border border-slate-100 shadow-sm p-6 lg:p-8">
             <p className="text-xs font-medium text-lime-700 mb-2 uppercase tracking-[0.25em]">
               {product.category || "Product"}
+            </p>
+            <p className="text-sm text-slate-600 mb-2 font-medium">
+              Product Number: {(product as any).productNumber || ""}
             </p>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3">
               {product.name}

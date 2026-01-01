@@ -16,7 +16,7 @@ export async function PUT(
 
     const { id } = await params;
     const body = await req.json();
-    const { name, description, price, stock, category, location, type, images, colorVariants } = body;
+    const { name, productNumber, description, price, stock, category, location, type, images, colorVariants } = body;
 
     // Get old data before update
     const oldProduct = await prisma.product.findUnique({
@@ -31,6 +31,7 @@ export async function PUT(
       where: { id },
       data: {
         name,
+        productNumber: productNumber as string,
         description,
         price: parseFloat(price),
         stock: parseInt(stock),
@@ -39,7 +40,7 @@ export async function PUT(
         type,
         images,
         colorVariants: colorVariants || [],
-      },
+      } as any,
     });
 
 

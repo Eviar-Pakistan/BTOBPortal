@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { Role } from "@prisma/client";
 import { AdminPanel } from "@/components/AdminPanel";
 
+export const dynamic = "force-dynamic";
 export default async function AdminPage() {
   const session = await auth();
   if (!session?.user || session.user.role !== Role.ADMIN) {
@@ -25,6 +26,7 @@ export default async function AdminPage() {
         select: {
           id: true,
           name: true,
+          productNumber: true,
           stock: true,
         },
       },
